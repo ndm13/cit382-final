@@ -11,22 +11,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
+ * Fragment object details for res/layout/fragment_item.xml
  */
 public class ItemFragment extends Fragment {
 	// TODO See doc note on ItemFragment::newInstance().  Should be able to safely delete these.
 	private static final String ARG_COLUMN_COUNT = "column-count";
 	private int mColumnCount = 1;
-	private OnListFragmentInteractionListener mListener;
+
+	private final DatabaseHelper helper;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
 	 * fragment (e.g. upon screen orientation changes).
 	 */
 	public ItemFragment() {
+		helper = new DatabaseHelper(getContext());
 	}
 
 	/**
@@ -66,42 +65,8 @@ public class ItemFragment extends Fragment {
 			} else {
 				recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
 			}
-			// TODO load items from db into adapter
-			// recyclerView.setAdapter(new GeoPhotoRecycleViewAdapter());
+			recyclerView.setAdapter(new GeoPhotoRecycleViewAdapter(GeoPhoto.load(helper)));
 		}
 		return view;
-	}
-
-
-	@Override
-	public void onAttach(Context context) {
-		super.onAttach(context);
-		if (context instanceof OnListFragmentInteractionListener) {
-			mListener = (OnListFragmentInteractionListener) context;
-		} else {
-			throw new RuntimeException(context.toString()
-					+ " must implement OnListFragmentInteractionListener");
-		}
-	}
-
-	@Override
-	public void onDetach() {
-		super.onDetach();
-		mListener = null;
-	}
-
-	/**
-	 * This interface must be implemented by activities that contain this
-	 * fragment to allow an interaction in this fragment to be communicated
-	 * to the activity and potentially other fragments contained in that
-	 * activity.
-	 * <p/>
-	 * See the Android Training lesson <a href=
-	 * "http://developer.android.com/training/basics/fragments/communicating.html"
-	 * >Communicating with Other Fragments</a> for more information.
-	 */
-	public interface OnListFragmentInteractionListener {
-		// TODO: Update argument type and name
-		void onListFragmentInteraction(GeoPhoto item);
 	}
 }
