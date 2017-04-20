@@ -18,6 +18,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 	public static GoogleApiClient GOOGLE_API_CLIENT;
 
+	/**
+	 * onClick handler for R.id.floatingActionButton
+	 *
+	 * Should launch a photo capture intent, generate a GeoPhoto, and save the photo to the gallery
+	 * and the database.  Then the RecyclerView should be refreshed.
+	 *
+	 * @param view     FloatingActionButton
+	 */
+	public void capturePhoto(View view) {
+		// TODO
+	}
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

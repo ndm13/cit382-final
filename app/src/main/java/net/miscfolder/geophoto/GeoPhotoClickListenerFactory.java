@@ -2,10 +2,15 @@ package net.miscfolder.geophoto;
 
 import android.view.View;
 
-/**
- * Created by Nathaniel on 4/20/2017.
- */
+import static android.view.View.*;
 
+/**
+ * This class is a wrapper for four OnClickListeners:
+ * - onImageClickListener: runs when the thunbnail image is clicked.
+ * - onMainTextClickListener: runs when the photo information is clicked.
+ * - onShareClickListener: runs when the share button is clicked.
+ * - onDeleteClickListener: runs when the delete button is clicked.
+ */
 public class GeoPhotoClickListenerFactory {
 	private final GeoPhotoRecycleViewAdapter.ViewHolder viewHolder;
 
@@ -13,28 +18,28 @@ public class GeoPhotoClickListenerFactory {
 		this.viewHolder = viewHolder;
 	}
 
-	public View.OnClickListener onImageClickListener = new View.OnClickListener() {
+	public final OnClickListener onImageClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			// TODO open viewHolder.photo for viewing
 		}
 	};
 
-	public View.OnClickListener onMainTextClickListener = new View.OnClickListener() {
+	public final OnClickListener onMainTextClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			// TODO switch to map and focus on location
 		}
 	};
 
-	public View.OnClickListener onShareClickListener = new View.OnClickListener() {
+	public final OnClickListener onShareClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			// TODO start image sharing intent
 		}
 	};
 
-	public View.OnClickListener onDeleteClickListener = new View.OnClickListener() {
+	public final OnClickListener onDeleteClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			// TODO prompt to confirm and if true, delete file
