@@ -5,7 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -34,6 +36,7 @@ public class GeoPhotoRecycleViewAdapter extends RecyclerView.Adapter<GeoPhotoRec
 		holder.imageContainer.setImageBitmap(BitmapFactory.decodeFile(holder.photo.getFileName()));
 		holder.fileName.setText(holder.photo.getFileName());
 		holder.fileInfo.setText(holder.photo.getInfoString());
+		holder.bindActions();
 	}
 
 	@Override
@@ -44,16 +47,28 @@ public class GeoPhotoRecycleViewAdapter extends RecyclerView.Adapter<GeoPhotoRec
 	public class ViewHolder extends RecyclerView.ViewHolder {
 		public final View view;
 		public final ImageView imageContainer;
-		public final TextView fileName;
-		public final TextView fileInfo;
+		public final LinearLayout mainText;
+		public final TextView fileName, fileInfo;
+		public final ImageButton share, delete;
 		public GeoPhoto photo;
 
 		public ViewHolder(View view) {
 			super(view);
 			this.view = view;
 			imageContainer = (ImageView) view.findViewById(R.id.imageContainer);
+			mainText = (LinearLayout) view.findViewById(R.id.mainText);
 			fileName = (TextView) view.findViewById(R.id.fileName);
 			fileInfo = (TextView) view.findViewById(R.id.fileInfo);
+			share = (ImageButton) view.findViewById(R.id.shareButton);
+			delete = (ImageButton) view.findViewById(R.id.deleteButton);
+		}
+
+		public void bindActions(){
+			GeoPhotoClickListenerFactory factory = new GeoPhotoClickListenerFactory(this);
+			imageContainer.setOnClickListener(factory.onImageClickListener);
+			mainText.setOnClickListener(factory.onMainTextClickListener);
+			share.setOnClickListener(factory.onShareClickListener);
+			delete.setOnClickListener(factory.onDeleteClickListener);
 		}
 
 		@Override

@@ -4,15 +4,6 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="horizontal">
-    <!--
-        We have a lot of elements that have implied interaction.  That interaction should be
-        implemented by linking this layout to MainActivity and using android:onClick XML attributes
-        on the clickable items.
-         - TODO imageContainer: onClick should open an image viewing intent on GeoPhoto.fileName
-         - TODO mainText: onClick should switch to the map fragment with focus on the image marker
-         - TODO shareButton: onClick should open an image sharing intent on GeoPhoto.fileName
-         - TODO deleteButton: onClick should remove the entry from the DB and delete the file
-    -->
 
     <ImageButton
         android:id="@+id/imageContainer"
@@ -26,6 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:clickable="true"
         android:orientation="vertical">
 
         <TextView
@@ -47,6 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_share"/>
 
     <ImageButton
@@ -54,6 +47,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:adjustViewBounds="false"
+        android:background="@android:color/transparent"
         app:srcCompat="@android:drawable/ic_menu_delete"/>
 
 </LinearLayout>
