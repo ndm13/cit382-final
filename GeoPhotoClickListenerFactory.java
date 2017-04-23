@@ -1,8 +1,11 @@
 package net.miscfolder.geophoto;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.widget.Toast;
 
 import static android.view.View.*;
 
@@ -31,6 +34,7 @@ public class GeoPhotoClickListenerFactory {
 		@Override
 		public void onClick(View v) {
 			// TODO switch to map and focus on location
+
 		}
 	};
 
@@ -51,7 +55,24 @@ public class GeoPhotoClickListenerFactory {
 	public final OnClickListener onDeleteClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			// TODO prompt to confirm and if true, delete file
+			// TODO fix up prompt to confirm and delete file
+			/*
+			AlertDialog.Builder confirmDelete = new AlertDialog.Builder();
+			confirmDelete.setTitle("Delete file");
+			confirmDelete.setMessage("Are you sure you want to delete?");
+			confirmDelete.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO delete file
+				}
+			});
+			confirmDelete.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					//Close
+					dialog.cancel();
+				}
+			});
+			confirmDelete.show();
+			*/
 		}
 	};
 }
