@@ -52,10 +52,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	public static final File FILE_STORAGE_DIR =
 			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 	private static final int PHOTO_INTENT = 1;
+	public static final int SHARE_INTENT = 2;
 	public static DatabaseHelper DATABASE_HELPER;
 
 	private GoogleApiClient apiClient;
-
 	private File lastCapturedFile;
 
 	/**
@@ -88,6 +88,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
 					if (lastCapturedFile.exists()) lastCapturedFile.delete();
 					lastCapturedFile = null;
+				}
+				break;
+			case SHARE_INTENT:
+				if(resultCode == RESULT_OK){
+					Toast.makeText(this, "Shared photo!", Toast.LENGTH_SHORT).show();
 				}
 				break;
 		}
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+		Log.e(MainActivity.class.getCanonicalName(),
+				"API connection couldn't be established: " + connectionResult.getErrorMessage());
 	}
 }

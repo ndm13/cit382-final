@@ -45,7 +45,6 @@ public class GeoPhotoClickListenerFactory extends FragmentActivity {
 		@Override
 		public void onClick(View v) {
 			// TODO switch to map and focus on location
-
 			Fragment switchMap = new Fragment();
 			FragmentManager fragmentManager = getFragmentManager();
 			fragmentManager.beginTransaction()
@@ -58,14 +57,14 @@ public class GeoPhotoClickListenerFactory extends FragmentActivity {
 	public final OnClickListener onShareClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			// TODO test sharing intent
-			Uri fileName = Uri.parse(viewHolder.photo.getFileName());
+		// TODO test sharing intent
+		Uri fileName = Uri.parse(viewHolder.photo.getFileName());
 
-			Intent shareIntent = new Intent();
-			shareIntent.setAction(Intent.ACTION_SEND);
-			shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
-			shareIntent.setType("image/*");
-			startActivity(Intent.createChooser(shareIntent, "Share image"));
+		Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
+		shareIntent.setType("image/*");
+		startActivityForResult(Intent.createChooser(shareIntent, "Share image"), MainActivity.SHARE_INTENT);
 		}
 	};
 
@@ -85,7 +84,7 @@ public class GeoPhotoClickListenerFactory extends FragmentActivity {
 					if(!viewHolder.photo.delete(MainActivity.DATABASE_HELPER)){
 						Toast.makeText(v.getContext(), "File was not removed from database (system error).", Toast.LENGTH_LONG).show();
 					}
-					// TODO refresh recycleview
+					// TODO refresh RecyclerView
 				}
 			});
 			confirmDelete.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
