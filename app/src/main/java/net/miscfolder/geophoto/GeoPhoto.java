@@ -133,4 +133,15 @@ public class GeoPhoto {
 		values.put(DatabaseHelper.Photos.COLUMN_NAME_DATE, FORMATTER.format(this.date));
 		return database.insert(DatabaseHelper.Photos.TABLE_NAME, null, values) != -1;
 	}
+
+	/**
+	 * Deletes the current GeoPhoto from the database using the provided helper object.
+	 * @param helper    The DatabaseHelper to use
+	 * @return          true if at least one row was deleted, false otherwise
+	 */
+	public synchronized boolean delete(DatabaseHelper helper){
+		SQLiteDatabase database = helper.getWritableDatabase();
+		return database.delete(DatabaseHelper.Photos.TABLE_NAME, "? = ?", new String[]{
+				DatabaseHelper.Photos.COLUMN_NAME_FILENAME, this.getFileName()}) > 0;
+	}
 }
