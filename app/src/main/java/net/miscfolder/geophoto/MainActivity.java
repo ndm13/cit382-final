@@ -1,13 +1,17 @@
 package net.miscfolder.geophoto;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,25 +21,40 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceDetectionApi;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.IllegalFormatCodePointException;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-		GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-	public static GoogleApiClient GOOGLE_API_CLIENT;
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 	public static final DateFormat FILE_TIMESTAMP_FORMATTER =
 			new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
 	public static final File FILE_STORAGE_DIR =
 			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+	private static final int PHOTO_INTENT = 1;
 	public static DatabaseHelper DATABASE_HELPER;
+
+	private GoogleApiClient apiClient;
 
 	private File lastCapturedFile;
 
@@ -54,29 +73,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 		Uri outputFileUri = Uri.fromFile(lastCapturedFile);
 		Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-		startActivityForResult(cameraIntent, 1);
+		startActivityForResult(cameraIntent, PHOTO_INTENT);
 	}
 
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// Handle camera activity result
-		if (requestCode == 1 && resultCode == RESULT_OK &&
-				lastCapturedFile != null && lastCapturedFile.length() > 0) {
-			// Generate and save photo
-			GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), GOOGLE_API_CLIENT);
-			photo.save(DATABASE_HELPER);
-			// Update library
-			Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-			Uri contentUri = Uri.fromFile(lastCapturedFile);
-			mediaScanIntent.setData(contentUri);
-			getApplicationContext().sendBroadcast(mediaScanIntent);
-			// TODO refresh RecyclerView
-		}else{
-			Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
-			if(lastCapturedFile.exists()) lastCapturedFile.delete();
-			lastCapturedFile = null;
+		switch (requestCode) {
+			case PHOTO_INTENT:
+				// Handle camera activity result
+				if (resultCode == RESULT_OK && lastCapturedFile != null && lastCapturedFile.length() > 0) {
+					handlePhotoData(data);
+				} else {
+					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
+					if (lastCapturedFile.exists()) lastCapturedFile.delete();
+					lastCapturedFile = null;
+				}
+				break;
 		}
+
+	}
+
+	private void handlePhotoData(Intent data) {
+		// Get location
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			throw new IllegalStateException("Permissions not available!");
+		}
+		PendingResult<PlaceLikelihoodBuffer> pendingResult = Places.PlaceDetectionApi.getCurrentPlace(apiClient, null);
+		pendingResult.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+			@Override
+			public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
+				Place place = placeLikelihoods.get(0).getPlace();
+				// Generate and save photo
+				GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
+				photo.save(DATABASE_HELPER);
+				// Update library
+				Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+				Uri contentUri = Uri.fromFile(lastCapturedFile);
+				mediaScanIntent.setData(contentUri);
+				getApplicationContext().sendBroadcast(mediaScanIntent);
+				// TODO refresh RecyclerView
+			}
+		});
 	}
 
 
@@ -85,31 +123,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		// Create an instance of GoogleAPIClient.
-		if (GOOGLE_API_CLIENT == null) {
-			GOOGLE_API_CLIENT = new GoogleApiClient.Builder(this)
-					.addConnectionCallbacks(this)
-					.addOnConnectionFailedListener(this)
-					.addApi(LocationServices.API)
-					.build();
-		}
+		apiClient = new GoogleApiClient
+				.Builder(this)
+				.addApi(Places.GEO_DATA_API)
+				.addApi(Places.PLACE_DETECTION_API)
+				.enableAutoManage(this, this)
+				.build();
 
 		// Create the database helper
 		DATABASE_HELPER = new DatabaseHelper(this);
-	}
-
-	@Override
-	protected void onStart() {
-		// Required to ensure availability of location services
-		GOOGLE_API_CLIENT.connect();
-		super.onStart();
-	}
-
-	@Override
-	protected void onStop() {
-		// Prevents lingering connections
-		GOOGLE_API_CLIENT.disconnect();
-		super.onStop();
 	}
 
 	@Override
@@ -118,22 +140,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	}
 
 	@Override
-	public void onConnected(@Nullable Bundle bundle) {
-		Log.d(this.getClass().getCanonicalName(), "onConnected: Connected to Google API Client.");
-	}
-
-	@Override
-	public void onConnectionSuspended(int i) {
-		Log.d(this.getClass().getCanonicalName(),
-				"onConnectionSuspended: Google API Client connection suspended [code " + i + "]");
-	}
-
-	@Override
 	public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-		Log.d(this.getClass().getCanonicalName(),
-				"onConnectionFailed: Google API Client connecction failed [result: "
-						+ connectionResult.getErrorCode() + ": "
-						+ connectionResult.getErrorMessage() + "]");
-		Toast.makeText(this, "Google API Services unreachable!", Toast.LENGTH_LONG).show();
+
 	}
 }

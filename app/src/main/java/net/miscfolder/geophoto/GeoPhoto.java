@@ -4,9 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
@@ -31,20 +33,6 @@ public class GeoPhoto {
 	private final String fileName;
 	private final LatLng coordinates;
 	private final Date date;
-
-	/**
-	 * Used for generating the object on-the-fly.
-	 * @param fileName      Full path of the file
-	 * @param apiClient     An instantiated GoogleApiClient to poll location from
-	 * @throws SecurityException
-	 *                      if we don't have location access (requested in manifest)
-	 */
-	public GeoPhoto(String fileName, GoogleApiClient apiClient) throws SecurityException{
-		this.fileName = fileName;
-		Location location = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-		this.coordinates = new LatLng(location.getLatitude(), location.getLongitude());
-		this.date = new Date();
-	}
 
 	/**
 	 * Simple wrapper for literal constructor that splits LatLng into two doubles.
