@@ -39,44 +39,34 @@
                 android:layout_height="match_parent">
 
                 <LinearLayout
-                    android:id="@+id/tab1"
+                    android:id="@+id/photo_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#ffc916"
                     android:orientation="vertical">
 
-                    <TextView
+                    <fragment
+                        android:id="@+id/listFragment"
+                        android:name="android.support.v4.app.ListFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="This is tab 1" />
+                        android:layout_height="match_parent"/>
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/tab2"
+                    android:id="@+id/map_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#da8200"
                     android:orientation="vertical">
 
-                    <TextView
+                    <fragment
+                        android:id="@+id/mapFragment"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="This is tab 2" />
+                        android:layout_height="match_parent"/>
+
                 </LinearLayout>
-
-                <fragment
-                    android:id="@+id/listFragment"
-                    android:name="android.support.v4.app.ListFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:layout="@layout/activity_main" />
-
-                <fragment
-                    android:id="@+id/mapFragment"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
 
             </FrameLayout>
         </LinearLayout>

@@ -1,52 +1,34 @@
 package net.miscfolder.geophoto;
 
 import android.Manifest;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceDetectionApi;
-import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.IllegalFormatCodePointException;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
@@ -130,22 +112,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		//TODO Link tabs with corresponding fragments
+
+		// Set the tab contents
 		TabHost host = (TabHost)findViewById(R.id.tabHost);
 		host.setup();
 
-		//Tab 1
-		TabHost.TabSpec spec = host.newTabSpec("MapFragment");
-		spec.setContent(R.id.tab1);
-		spec.setIndicator("MapFragment");
+		TabHost.TabSpec spec = host.newTabSpec("photo_list");
+		spec.setContent(R.id.photo_list);
+		spec.setIndicator("Photo List");
 		host.addTab(spec);
 
-		//Tab 2
-		spec = host.newTabSpec("ListFragment");
-		spec.setContent(R.id.tab2);
-		spec.setIndicator("ListFragment");
+		spec = host.newTabSpec("map_view");
+		spec.setContent(R.id.map_view);
+		spec.setIndicator("Map View");
 		host.addTab(spec);
 
+		// Create the API client
 		apiClient = new GoogleApiClient
 				.Builder(this)
 				.addApi(Places.GEO_DATA_API)
