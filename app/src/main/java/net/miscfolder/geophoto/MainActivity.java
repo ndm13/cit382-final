@@ -1,6 +1,8 @@
 package net.miscfolder.geophoto;
 
 import android.Manifest;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
@@ -17,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -127,6 +130,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		//TODO Link tabs with corresponding fragments
+		TabHost host = (TabHost)findViewById(R.id.tabHost);
+		host.setup();
+
+		//Tab 1
+		TabHost.TabSpec spec = host.newTabSpec("MapFragment");
+		spec.setContent(R.id.tab1);
+		spec.setIndicator("MapFragment");
+		host.addTab(spec);
+
+		//Tab 2
+		spec = host.newTabSpec("ListFragment");
+		spec.setContent(R.id.tab2);
+		spec.setIndicator("ListFragment");
+		host.addTab(spec);
 
 		apiClient = new GoogleApiClient
 				.Builder(this)
