@@ -15,11 +15,11 @@ import java.util.List;
 /**
  * Responsible for generating and storing the elements of the list.
  */
-public class GeoPhotoRecycleViewAdapter extends RecyclerView.Adapter<GeoPhotoRecycleViewAdapter.ViewHolder> {
+public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRecyclerViewAdapter.ViewHolder> {
 
 	private final List<GeoPhoto> photoList;
 
-	public GeoPhotoRecycleViewAdapter(List<GeoPhoto> items) {
+	public GeoPhotoRecyclerViewAdapter(List<GeoPhoto> items) {
 		photoList = items;
 	}
 
@@ -36,7 +36,6 @@ public class GeoPhotoRecycleViewAdapter extends RecyclerView.Adapter<GeoPhotoRec
 		holder.imageContainer.setImageBitmap(BitmapFactory.decodeFile(holder.photo.getFileName()));
 		holder.fileName.setText(holder.photo.getFileName());
 		holder.fileInfo.setText(holder.photo.getInfoString());
-		holder.bindActions();
 	}
 
 	@Override
@@ -61,9 +60,7 @@ public class GeoPhotoRecycleViewAdapter extends RecyclerView.Adapter<GeoPhotoRec
 			fileInfo = (TextView) view.findViewById(R.id.fileInfo);
 			share = (ImageButton) view.findViewById(R.id.shareButton);
 			delete = (ImageButton) view.findViewById(R.id.deleteButton);
-		}
 
-		public void bindActions(){
 			GeoPhotoClickListenerFactory factory = new GeoPhotoClickListenerFactory(this);
 			imageContainer.setOnClickListener(factory.onImageClickListener);
 			mainText.setOnClickListener(factory.onMainTextClickListener);

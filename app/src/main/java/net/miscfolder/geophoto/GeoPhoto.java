@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,9 +90,9 @@ public class GeoPhoto {
 	public static List<GeoPhoto> load(DatabaseHelper helper){
 		SQLiteDatabase database = helper.getReadableDatabase();
 		Cursor cursor = database.query(DatabaseHelper.Photos.TABLE_NAME, SELECT_COLS, null, null,
-				null, null, DatabaseHelper.Photos.COLUMN_NAME_DATE + "DESC");
+				null, null, DatabaseHelper.Photos.COLUMN_NAME_DATE + " DESC");
 		List<GeoPhoto> geoPhotoList = new LinkedList<>();
-		while (cursor.moveToNext()){
+		while (cursor.moveToNext()) {
 			try {
 				geoPhotoList.add(new GeoPhoto(
 						cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.Photos.COLUMN_NAME_FILENAME)),

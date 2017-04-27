@@ -47,7 +47,7 @@
 
                     <fragment
                         android:id="@+id/listFragment"
-                        android:name="android.support.v4.app.ListFragment"
+                        android:name="net.miscfolder.geophoto.ItemFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
 

@@ -30,6 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 	public static final DateFormat FILE_TIMESTAMP_FORMATTER =
@@ -71,7 +72,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					handlePhotoData(data);
 				} else {
 					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
-					if (lastCapturedFile.exists()) lastCapturedFile.delete();
+					if (lastCapturedFile.exists())
+						if(!lastCapturedFile.delete())
+							Toast.makeText(this, "Error deleting temporary file!", Toast.LENGTH_LONG).show();
 					lastCapturedFile = null;
 				}
 				break;
@@ -93,16 +96,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 		pendingResult.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
 			@Override
 			public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-				Place place = placeLikelihoods.get(0).getPlace();
-				// Generate and save photo
-				GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
-				photo.save(DATABASE_HELPER);
-				// Update library
-				Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-				Uri contentUri = Uri.fromFile(lastCapturedFile);
-				mediaScanIntent.setData(contentUri);
-				getApplicationContext().sendBroadcast(mediaScanIntent);
-				// TODO refresh RecyclerView
+				try {
+					Place place = placeLikelihoods.get(0).getPlace();
+					// Generate and save photo
+					GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
+					photo.save(DATABASE_HELPER);
+					// Update library
+					Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+					Uri contentUri = Uri.fromFile(lastCapturedFile);
+					mediaScanIntent.setData(contentUri);
+					getApplicationContext().sendBroadcast(mediaScanIntent);
+					// TODO refresh RecyclerView
+				}catch(Exception e){
+					Log.e(this.getClass().getCanonicalName(), "Caught that exception for you, boss.", e);
+					throw e;
+				}
 			}
 		});
 	}

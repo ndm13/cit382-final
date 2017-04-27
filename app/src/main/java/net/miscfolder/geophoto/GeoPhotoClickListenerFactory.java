@@ -1,20 +1,14 @@
 package net.miscfolder.geophoto;
 
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.File;
 
@@ -28,9 +22,9 @@ import static android.view.View.*;
  * - onDeleteClickListener: runs when the delete button is clicked.
  */
 public class GeoPhotoClickListenerFactory extends FragmentActivity {
-	private final GeoPhotoRecycleViewAdapter.ViewHolder viewHolder;
+	private final GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder;
 
-	public GeoPhotoClickListenerFactory(GeoPhotoRecycleViewAdapter.ViewHolder viewHolder) {
+	public GeoPhotoClickListenerFactory(GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder) {
 		this.viewHolder = viewHolder;
 	}
 
