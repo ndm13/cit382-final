@@ -1,18 +1,16 @@
 package net.miscfolder.geophoto;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.widget.TabHost;
 import android.widget.Toast;
 
 import java.io.File;
 
-import static android.view.View.*;
+import static android.view.View.OnClickListener;
 
 /**
  * This class is a wrapper for four OnClickListeners:
@@ -21,7 +19,7 @@ import static android.view.View.*;
  * - onShareClickListener: runs when the share button is clicked.
  * - onDeleteClickListener: runs when the delete button is clicked.
  */
-public class GeoPhotoClickListenerFactory extends FragmentActivity {
+public class GeoPhotoClickListenerFactory{
 	private final GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder;
 
 	public GeoPhotoClickListenerFactory(GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder) {
@@ -38,13 +36,9 @@ public class GeoPhotoClickListenerFactory extends FragmentActivity {
 	public final OnClickListener onMainTextClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			// TODO switch to map and focus on location
-			Fragment switchMap = new Fragment();
-			FragmentManager fragmentManager = getFragmentManager();
-			fragmentManager.beginTransaction()
-					.replace(R.id.map, switchMap)
-					.commit();
-
+			TabHost tabHost = (TabHost)MainActivity.activity.findViewById(R.id.tabHost);
+			tabHost.setCurrentTab(1);
+			// TODO Set the focus of the map to the marker selected
 		}
 	};
 
@@ -58,7 +52,9 @@ public class GeoPhotoClickListenerFactory extends FragmentActivity {
 		shareIntent.setAction(Intent.ACTION_SEND);
 		shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
 		shareIntent.setType("image/*");
-		startActivityForResult(Intent.createChooser(shareIntent, "Share image"), MainActivity.SHARE_INTENT);
+		MainActivity.activity
+				.startActivityForResult(Intent.createChooser(shareIntent, "Share image"),
+						MainActivity.SHARE_INTENT);
 		}
 	};
 

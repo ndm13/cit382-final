@@ -1,15 +1,13 @@
 package net.miscfolder.geophoto;
 
-import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TabHost;
@@ -19,10 +17,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,7 +28,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 	public static final DateFormat FILE_TIMESTAMP_FORMATTER =
@@ -44,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	public static final int SHARE_INTENT = 2;
 	private static final int PLACE_INTENT = 3;
 	public static DatabaseHelper DATABASE_HELPER;
+	public static Activity activity;
 
 	private GoogleApiClient apiClient;
 	private File lastCapturedFile;
@@ -119,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		activity = this;
 
 		// Set the tab contents
 		TabHost host = (TabHost)findViewById(R.id.tabHost);
