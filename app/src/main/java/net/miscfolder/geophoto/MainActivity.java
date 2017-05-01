@@ -16,12 +16,15 @@ import android.widget.TabHost;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 	private static final int PHOTO_INTENT = 1;
 	public static final int SHARE_INTENT = 2;
+	private static final int PLACE_INTENT = 3;
 	public static DatabaseHelper DATABASE_HELPER;
 
 	private GoogleApiClient apiClient;
@@ -69,7 +73,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			case PHOTO_INTENT:
 				// Handle camera activity result
 				if (resultCode == RESULT_OK && lastCapturedFile != null && lastCapturedFile.length() > 0) {
-					handlePhotoData(data);
+					try {
+						Intent placeIntent = new PlacePicker.IntentBuilder().build(this);
+						startActivityForResult(placeIntent, PLACE_INTENT);
+					} catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+						e.printStackTrace();
+					}
+
 				} else {
 					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
 					if (lastCapturedFile.exists())
@@ -83,21 +93,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					Toast.makeText(this, "Shared photo!", Toast.LENGTH_SHORT).show();
 				}
 				break;
-		}
-
-	}
-
-	private void handlePhotoData(Intent data) {
-		// Get location
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			throw new IllegalStateException("Permissions not available!");
-		}
-		PendingResult<PlaceLikelihoodBuffer> pendingResult = Places.PlaceDetectionApi.getCurrentPlace(apiClient, null);
-		pendingResult.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-			@Override
-			public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-				try {
-					Place place = placeLikelihoods.get(0).getPlace();
+			case PLACE_INTENT:
+				if(resultCode == RESULT_OK){
+					Place place = PlacePicker.getPlace(this, data);
 					// Generate and save photo
 					GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
 					photo.save(DATABASE_HELPER);
@@ -107,12 +105,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					mediaScanIntent.setData(contentUri);
 					getApplicationContext().sendBroadcast(mediaScanIntent);
 					// TODO refresh RecyclerView
-				}catch(Exception e){
-					Log.e(this.getClass().getCanonicalName(), "Caught that exception for you, boss.", e);
-					throw e;
+					Toast.makeText(this, "Photo added!", Toast.LENGTH_SHORT).show();
+				}else{
+					Toast.makeText(this, "Could not access PlacePicker API!", Toast.LENGTH_LONG).show();
 				}
-			}
-		});
+				break;
+		}
+
 	}
 
 
