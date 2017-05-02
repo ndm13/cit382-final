@@ -29,7 +29,10 @@ public class GeoPhotoClickListenerFactory{
 	public final OnClickListener onImageClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			// TODO open viewHolder.photo for viewing
+			Intent intent = new Intent();
+			intent.setAction(Intent.ACTION_VIEW);
+			intent.setDataAndType(Uri.parse("file://" + viewHolder.photo.getFileName()), "image/*");
+			MainActivity.activity.startActivity(intent);
 		}
 	};
 
