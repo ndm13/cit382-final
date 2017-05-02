@@ -21,14 +21,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/fileName"
+            android:id="@+id/coordinates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="File Name"
             android:textSize="18sp"/>
 
         <TextView
-            android:id="@+id/fileInfo"
+            android:id="@+id/infoText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Coordinates - DateTime"/>

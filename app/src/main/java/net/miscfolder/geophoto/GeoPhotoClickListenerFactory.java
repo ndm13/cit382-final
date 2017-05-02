@@ -45,23 +45,20 @@ public class GeoPhotoClickListenerFactory{
 	public final OnClickListener onShareClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-		// TODO test sharing intent
-		Uri fileName = Uri.parse(viewHolder.photo.getFileName());
-
-		Intent shareIntent = new Intent();
-		shareIntent.setAction(Intent.ACTION_SEND);
-		shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
-		shareIntent.setType("image/*");
-		MainActivity.activity
-				.startActivityForResult(Intent.createChooser(shareIntent, "Share image"),
-						MainActivity.SHARE_INTENT);
+			Uri fileName = Uri.parse("file://" + viewHolder.photo.getFileName());
+			Intent shareIntent = new Intent();
+			shareIntent.setAction(Intent.ACTION_SEND);
+			shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
+			shareIntent.setType("image/*");
+			MainActivity.activity
+					.startActivityForResult(Intent.createChooser(shareIntent, "Share image"),
+							MainActivity.SHARE_INTENT);
 		}
 	};
 
 	public final OnClickListener onDeleteClickListener = new OnClickListener() {
 		@Override
 		public void onClick(final View v) {
-			// TODO test delete file
 			AlertDialog.Builder confirmDelete = new AlertDialog.Builder(v.getContext());
 			confirmDelete.setTitle("Delete file");
 			confirmDelete.setMessage("Are you sure you want to delete?");

@@ -34,8 +34,8 @@ public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRe
 	public void onBindViewHolder(final ViewHolder holder, int position) {
 		holder.photo = photoList.get(position);
 		holder.imageContainer.setImageBitmap(BitmapFactory.decodeFile(holder.photo.getFileName()));
-		holder.fileName.setText(holder.photo.getFileName());
-		holder.fileInfo.setText(holder.photo.getInfoString());
+		holder.coordinates.setText(holder.photo.getCoordinatesAsText());
+		holder.infoText.setText(holder.photo.getInfoText());
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRe
 		public final View view;
 		public final ImageView imageContainer;
 		public final LinearLayout mainText;
-		public final TextView fileName, fileInfo;
+		public final TextView coordinates, infoText;
 		public final ImageButton share, delete;
 		public GeoPhoto photo;
 
@@ -56,8 +56,8 @@ public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRe
 			this.view = view;
 			imageContainer = (ImageView) view.findViewById(R.id.imageContainer);
 			mainText = (LinearLayout) view.findViewById(R.id.mainText);
-			fileName = (TextView) view.findViewById(R.id.fileName);
-			fileInfo = (TextView) view.findViewById(R.id.fileInfo);
+			coordinates = (TextView) view.findViewById(R.id.coordinates);
+			infoText = (TextView) view.findViewById(R.id.infoText);
 			share = (ImageButton) view.findViewById(R.id.shareButton);
 			delete = (ImageButton) view.findViewById(R.id.deleteButton);
 
@@ -70,7 +70,7 @@ public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRe
 
 		@Override
 		public String toString() {
-			return super.toString() + " '" + fileName.getText() + "'";
+			return super.toString() + " '" + coordinates.getText() + "'";
 		}
 	}
 }

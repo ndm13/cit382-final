@@ -1,24 +1,15 @@
 package net.miscfolder.geophoto;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
-import android.os.AsyncTask;
-import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,8 +63,13 @@ public class GeoPhoto {
 		return date;
 	}
 
-	public String getInfoString() {
-		return FORMATTER.format(date) + " - " + coordinates.latitude + " - " + coordinates.longitude;
+	public String getCoordinatesAsText(){
+		return (Math.round(coordinates.latitude * 1000.0) / 1000.0) + ", " +
+				(Math.round(coordinates.longitude * 1000.0) / 1000.0);
+	}
+
+	public String getInfoText() {
+		return FORMATTER.format(date);
 	}
 
 	// Database methods
@@ -132,7 +128,8 @@ public class GeoPhoto {
 	 */
 	public synchronized boolean delete(DatabaseHelper helper){
 		SQLiteDatabase database = helper.getWritableDatabase();
-		return database.delete(DatabaseHelper.Photos.TABLE_NAME, "? = ?", new String[]{
-				DatabaseHelper.Photos.COLUMN_NAME_FILENAME, this.getFileName()}) > 0;
+		return database.delete(DatabaseHelper.Photos.TABLE_NAME,
+				DatabaseHelper.Photos.COLUMN_NAME_FILENAME + " = ?",
+				new String[]{this.getFileName()}) > 0;
 	}
 }
