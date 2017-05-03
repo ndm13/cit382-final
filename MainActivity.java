@@ -1,52 +1,33 @@
 package net.miscfolder.geophoto;
 
-import android.Manifest;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceDetectionApi;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.IllegalFormatCodePointException;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
@@ -56,7 +37,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 	private static final int PHOTO_INTENT = 1;
 	public static final int SHARE_INTENT = 2;
+	private static final int PLACE_INTENT = 3;
 	public static DatabaseHelper DATABASE_HELPER;
+	public static Activity activity;
+
 
 	private GoogleApiClient apiClient;
 	private File lastCapturedFile;
@@ -86,10 +70,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			case PHOTO_INTENT:
 				// Handle camera activity result
 				if (resultCode == RESULT_OK && lastCapturedFile != null && lastCapturedFile.length() > 0) {
-					handlePhotoData(data);
+					try {
+						Intent placeIntent = new PlacePicker.IntentBuilder().build(this);
+						startActivityForResult(placeIntent, PLACE_INTENT);
+					} catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+						e.printStackTrace();
+					}
+
 				} else {
 					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
-					if (lastCapturedFile.exists()) lastCapturedFile.delete();
+					if (lastCapturedFile.exists())
+						if(!lastCapturedFile.delete())
+							Toast.makeText(this, "Error deleting temporary file!", Toast.LENGTH_LONG).show();
 					lastCapturedFile = null;
 				}
 				break;
@@ -98,54 +90,51 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					Toast.makeText(this, "Shared photo!", Toast.LENGTH_SHORT).show();
 				}
 				break;
+			case PLACE_INTENT:
+				if(resultCode == RESULT_OK){
+					Place place = PlacePicker.getPlace(this, data);
+					// Generate and save photo
+					GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
+					photo.save(DATABASE_HELPER);
+					// Update library
+					Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+					Uri contentUri = Uri.fromFile(lastCapturedFile);
+					mediaScanIntent.setData(contentUri);
+					getApplicationContext().sendBroadcast(mediaScanIntent);
+					//TODO refine refresh
+					//Feel like this is very rough draft, but might suffice
+					finish();
+					startActivity(getIntent());
+					Toast.makeText(this, "Photo added!", Toast.LENGTH_SHORT).show();
+				}else{
+					Toast.makeText(this, "Could not access PlacePicker API!", Toast.LENGTH_LONG).show();
+				}
+				break;
 		}
 
 	}
-
-	private void handlePhotoData(Intent data) {
-		// Get location
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			throw new IllegalStateException("Permissions not available!");
-		}
-		PendingResult<PlaceLikelihoodBuffer> pendingResult = Places.PlaceDetectionApi.getCurrentPlace(apiClient, null);
-		pendingResult.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-			@Override
-			public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-				Place place = placeLikelihoods.get(0).getPlace();
-				// Generate and save photo
-				GeoPhoto photo = new GeoPhoto(lastCapturedFile.getAbsolutePath(), place.getLatLng(), new Date());
-				photo.save(DATABASE_HELPER);
-				// Update library
-				Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-				Uri contentUri = Uri.fromFile(lastCapturedFile);
-				mediaScanIntent.setData(contentUri);
-				getApplicationContext().sendBroadcast(mediaScanIntent);
-				// TODO refresh RecyclerView
-			}
-		});
-	}
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		//TODO Link tabs with corresponding fragments
+		activity = this;
+
+		// Set the tab contents
 		TabHost host = (TabHost)findViewById(R.id.tabHost);
 		host.setup();
 
-		//Tab 1
-		TabHost.TabSpec spec = host.newTabSpec("MapFragment");
-		spec.setContent(R.id.tab1);
-		spec.setIndicator("MapFragment");
+		TabHost.TabSpec spec = host.newTabSpec("photo_list");
+		spec.setContent(R.id.photo_list);
+		spec.setIndicator("Photo List");
 		host.addTab(spec);
 
-		//Tab 2
-		spec = host.newTabSpec("ListFragment");
-		spec.setContent(R.id.tab2);
-		spec.setIndicator("ListFragment");
+		spec = host.newTabSpec("map_view");
+		spec.setContent(R.id.map_view);
+		spec.setIndicator("Map View");
 		host.addTab(spec);
 
+		// Create the API client
 		apiClient = new GoogleApiClient
 				.Builder(this)
 				.addApi(Places.GEO_DATA_API)
@@ -159,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
-		// TODO initialize map
+
 	}
 
 	@Override
