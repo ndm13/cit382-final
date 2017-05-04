@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			markers++;
 		}
 		if (markers > 0)
-			scheduleCameraUpdate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5));
+			scheduleCameraUpdate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 20));
 	}
 
 	@Override
