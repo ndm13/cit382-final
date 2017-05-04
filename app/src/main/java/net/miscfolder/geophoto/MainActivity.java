@@ -206,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			}
 		});
 		LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+		int markers = 0;
 		for(GeoPhoto photo : GeoPhoto.load(DATABASE_HELPER)){
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.position(photo.getCoordinates());
@@ -213,8 +214,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 			Marker marker = googleMap.addMarker(markerOptions);
 			marker.setTag(photo);
 			boundsBuilder.include(photo.getCoordinates());
+			markers++;
 		}
-		scheduleCameraUpdate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5));
+		if (markers > 0)
+			scheduleCameraUpdate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5));
 	}
 
 	@Override
