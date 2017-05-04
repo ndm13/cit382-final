@@ -22,7 +22,7 @@ import java.util.Locale;
  * @author Nathaniel
  */
 public class GeoPhoto {
-	private static final DateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+	public static final DateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
 	private final String fileName;
 	private final LatLng coordinates;

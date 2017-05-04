@@ -1,7 +1,7 @@
 package net.miscfolder.geophoto;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.Toast;
 
@@ -20,8 +21,14 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -38,7 +45,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 	public static final int SHARE_INTENT = 2;
 	private static final int PLACE_INTENT = 3;
 	public static DatabaseHelper DATABASE_HELPER;
-	public static Activity activity;
+	public static MainActivity activity;
+	public static GoogleMap map;
 
 	private GoogleApiClient apiClient;
 	private File lastCapturedFile;
@@ -99,8 +107,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 					Uri contentUri = Uri.fromFile(lastCapturedFile);
 					mediaScanIntent.setData(contentUri);
 					getApplicationContext().sendBroadcast(mediaScanIntent);
-					// TODO refresh RecyclerView
 					Toast.makeText(this, "Photo added!", Toast.LENGTH_SHORT).show();
+					refresh();
 				}else{
 					Toast.makeText(this, "Could not access PlacePicker API!", Toast.LENGTH_LONG).show();
 				}
@@ -109,6 +117,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 	}
 
+	public void refresh() {
+		//TODO refine refresh
+		//Feel like this is very rough draft, but might suffice
+		finish();
+		startActivity(getIntent());
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -140,11 +154,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		// Create the database helper
 		DATABASE_HELPER = new DatabaseHelper(this);
+
+		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
 	}
 
 	@Override
-	public void onMapReady(GoogleMap googleMap) {
-		// TODO initialize map
+	public void onMapReady(final GoogleMap googleMap) {
+		MainActivity.map = googleMap;
+		googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+			@Override
+			public void onMapLoaded() {
+				LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+				for(GeoPhoto photo : GeoPhoto.load(DATABASE_HELPER)){
+					MarkerOptions markerOptions = new MarkerOptions();
+					markerOptions.position(photo.getCoordinates());
+					markerOptions.title(GeoPhoto.FORMATTER.format(photo.getDate()));
+					Marker marker = googleMap.addMarker(markerOptions);
+					marker.setTag(photo);
+					boundsBuilder.include(photo.getCoordinates());
+				}
+				CameraUpdate update = CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5);
+				googleMap.animateCamera(update);
+			}
+		});
+		googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+			@Override
+			public View getInfoWindow(Marker marker) {
+				return null;
+			}
+
+			@Override
+			public View getInfoContents(Marker marker) {
+				try {
+					ImageView view = new ImageView(MainActivity.this);
+					view.setImageBitmap(BitmapFactory.decodeFile(((GeoPhoto) marker.getTag()).getFileName()));
+					return view;
+				}catch(NullPointerException e){
+					Toast.makeText(MainActivity.this, "Couldn't render image!", Toast.LENGTH_SHORT).show();
+					return null;
+				}
+			}
+		});
 	}
 
 	@Override

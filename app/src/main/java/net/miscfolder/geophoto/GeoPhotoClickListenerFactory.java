@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
-import android.widget.TabHost;
 import android.widget.Toast;
 
 import java.io.File;
@@ -39,9 +38,13 @@ public class GeoPhotoClickListenerFactory{
 	public final OnClickListener onMainTextClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			/*
 			TabHost tabHost = (TabHost)MainActivity.activity.findViewById(R.id.tabHost);
 			tabHost.setCurrentTab(1);
-			// TODO Set the focus of the map to the marker selected
+			MainActivity.map.moveCamera(CameraUpdateFactory.newLatLng(viewHolder.photo.getCoordinates()));
+			*/
+			// Time constraints -> scrapped map updating
+			onImageClickListener.onClick(v);
 		}
 	};
 
@@ -74,7 +77,7 @@ public class GeoPhotoClickListenerFactory{
 					if(!viewHolder.photo.delete(MainActivity.DATABASE_HELPER)){
 						Toast.makeText(v.getContext(), "File was not removed from database (system error).", Toast.LENGTH_LONG).show();
 					}
-					// TODO refresh RecyclerView
+					MainActivity.activity.refresh();
 				}
 			});
 			confirmDelete.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

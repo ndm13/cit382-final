@@ -9,7 +9,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.util.List;
 
 /**
@@ -17,7 +16,7 @@ import java.util.List;
  */
 public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRecyclerViewAdapter.ViewHolder> {
 
-	private final List<GeoPhoto> photoList;
+	public final List<GeoPhoto> photoList;
 
 	public GeoPhotoRecyclerViewAdapter(List<GeoPhoto> items) {
 		photoList = items;
@@ -29,6 +28,19 @@ public class GeoPhotoRecyclerViewAdapter extends RecyclerView.Adapter<GeoPhotoRe
 				.inflate(R.layout.fragment_item, parent, false);
 		return new ViewHolder(view);
 	}
+
+	// Clean all elements of the recycler
+	public void clear() {
+		photoList.clear();
+		notifyDataSetChanged();
+	}
+
+	// Add items
+	public void addAll(List<GeoPhoto> items) {
+		photoList.addAll(items);
+		notifyDataSetChanged();
+	}
+
 
 	@Override
 	public void onBindViewHolder(final ViewHolder holder, int position) {
