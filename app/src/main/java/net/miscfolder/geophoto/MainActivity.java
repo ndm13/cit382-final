@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 				} else {
 					Toast.makeText(this, "Camera didn't return an image!", Toast.LENGTH_SHORT).show();
-					if (lastCapturedFile.exists())
+					if (lastCapturedFile != null && lastCapturedFile.exists())
 						if(!lastCapturedFile.delete())
 							Toast.makeText(this, "Error deleting temporary file!", Toast.LENGTH_LONG).show();
 					lastCapturedFile = null;

@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,7 +26,9 @@ import java.util.Locale;
 public class GeoPhoto {
 	public static final DateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
-	private final String fileName;
+	private final
+	@NotNull
+	String fileName;
 	private final LatLng coordinates;
 	private final Date date;
 
@@ -35,7 +39,7 @@ public class GeoPhoto {
 	 * @param longitude     Longitude where photo was taken
 	 * @param date          Date photo was taken
 	 */
-	public GeoPhoto(String fileName, double latitude, double longitude, Date date){
+	public GeoPhoto(@NotNull String fileName, double latitude, double longitude, Date date) {
 		this(fileName, new LatLng(latitude, longitude), date);
 	}
 
@@ -45,13 +49,15 @@ public class GeoPhoto {
 	 * @param coordinates   Coordinates where photo was taken
 	 * @param date          Date photo was taken
 	 */
-	public GeoPhoto(String fileName, LatLng coordinates, Date date){
+	public GeoPhoto(@NotNull String fileName, LatLng coordinates, Date date) {
 		this.fileName = fileName;
 		this.coordinates = coordinates;
 		this.date = date;
 	}
 
-	public String getFileName() {
+	public
+	@NotNull
+	String getFileName() {
 		return fileName;
 	}
 
@@ -103,6 +109,7 @@ public class GeoPhoto {
 				Log.e(GeoPhoto.class.getCanonicalName(), "load: Error loading photo [invalid column data]", e);
 			}
 		}
+		cursor.close();
 		return geoPhotoList;
 	}
 
