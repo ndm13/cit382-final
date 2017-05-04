@@ -5,7 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.widget.TabHost;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
 
 import java.io.File;
 
@@ -19,10 +22,10 @@ import static android.view.View.OnClickListener;
  * - onDeleteClickListener: runs when the delete button is clicked.
  */
 public class GeoPhotoClickListenerFactory{
-	private final GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder;
+	private final GeoPhoto photo;
 
-	public GeoPhotoClickListenerFactory(GeoPhotoRecyclerViewAdapter.ViewHolder viewHolder) {
-		this.viewHolder = viewHolder;
+	public GeoPhotoClickListenerFactory(GeoPhoto photo) {
+		this.photo = photo;
 	}
 
 	public final OnClickListener onImageClickListener = new OnClickListener() {
@@ -30,7 +33,7 @@ public class GeoPhotoClickListenerFactory{
 		public void onClick(View v) {
 			Intent intent = new Intent();
 			intent.setAction(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.parse("file://" + viewHolder.photo.getFileName()), "image/*");
+			intent.setDataAndType(Uri.parse("file://" + photo.getFileName()), "image/*");
 			MainActivity.activity.startActivity(intent);
 		}
 	};
@@ -38,20 +41,16 @@ public class GeoPhotoClickListenerFactory{
 	public final OnClickListener onMainTextClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			/*
 			TabHost tabHost = (TabHost)MainActivity.activity.findViewById(R.id.tabHost);
 			tabHost.setCurrentTab(1);
-			MainActivity.map.moveCamera(CameraUpdateFactory.newLatLng(viewHolder.photo.getCoordinates()));
-			*/
-			// Time constraints -> scrapped map updating
-			onImageClickListener.onClick(v);
+			MainActivity.activity.scheduleCameraUpdate(CameraUpdateFactory.newLatLng(photo.getCoordinates()));
 		}
 	};
 
 	public final OnClickListener onShareClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Uri fileName = Uri.parse("file://" + viewHolder.photo.getFileName());
+			Uri fileName = Uri.parse("file://" + photo.getFileName());
 			Intent shareIntent = new Intent();
 			shareIntent.setAction(Intent.ACTION_SEND);
 			shareIntent.putExtra(Intent.EXTRA_STREAM, fileName);
@@ -70,11 +69,11 @@ public class GeoPhotoClickListenerFactory{
 			confirmDelete.setMessage("Are you sure you want to delete?");
 			confirmDelete.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					File file = new File(viewHolder.photo.getFileName());
+					File file = new File(photo.getFileName());
 					if(file.exists() && !file.delete()){
 						Toast.makeText(v.getContext(), "File was not deleted (system error).", Toast.LENGTH_LONG).show();
 					}
-					if(!viewHolder.photo.delete(MainActivity.DATABASE_HELPER)){
+					if(!photo.delete(MainActivity.DATABASE_HELPER)){
 						Toast.makeText(v.getContext(), "File was not removed from database (system error).", Toast.LENGTH_LONG).show();
 					}
 					MainActivity.activity.refresh();

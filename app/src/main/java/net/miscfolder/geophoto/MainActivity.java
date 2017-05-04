@@ -33,8 +33,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
 	public static final DateFormat FILE_TIMESTAMP_FORMATTER =
@@ -159,23 +161,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 		mapFragment.getMapAsync(this);
 	}
 
+	private Queue<CameraUpdate> updateQueue = new ArrayDeque<>();
+	public void scheduleCameraUpdate(CameraUpdate update){
+		try{
+			map.moveCamera(update);
+		}catch(IllegalStateException e){
+			updateQueue.add(update);
+		}
+	}
+
 	@Override
 	public void onMapReady(final GoogleMap googleMap) {
 		MainActivity.map = googleMap;
 		googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
 			@Override
 			public void onMapLoaded() {
-				LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-				for(GeoPhoto photo : GeoPhoto.load(DATABASE_HELPER)){
-					MarkerOptions markerOptions = new MarkerOptions();
-					markerOptions.position(photo.getCoordinates());
-					markerOptions.title(GeoPhoto.FORMATTER.format(photo.getDate()));
-					Marker marker = googleMap.addMarker(markerOptions);
-					marker.setTag(photo);
-					boundsBuilder.include(photo.getCoordinates());
+				while(!updateQueue.isEmpty()){
+					googleMap.moveCamera(updateQueue.remove());
 				}
-				CameraUpdate update = CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5);
-				googleMap.animateCamera(update);
 			}
 		});
 		googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -196,6 +199,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 				}
 			}
 		});
+		googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+			@Override
+			public void onInfoWindowClick(Marker marker) {
+				new GeoPhotoClickListenerFactory(((GeoPhoto) marker.getTag())).onShareClickListener.onClick(null);
+			}
+		});
+		LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+		for(GeoPhoto photo : GeoPhoto.load(DATABASE_HELPER)){
+			MarkerOptions markerOptions = new MarkerOptions();
+			markerOptions.position(photo.getCoordinates());
+			markerOptions.title(GeoPhoto.FORMATTER.format(photo.getDate()));
+			Marker marker = googleMap.addMarker(markerOptions);
+			marker.setTag(photo);
+			boundsBuilder.include(photo.getCoordinates());
+		}
+		scheduleCameraUpdate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 5));
 	}
 
 	@Override
